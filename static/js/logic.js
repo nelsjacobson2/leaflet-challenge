@@ -15,14 +15,16 @@ var myMap = L.map("map", {
   
   // Overlay layers
   var earthquakes = L.layerGroup().addTo(myMap);
+  var tectonicPlates = L.layerGroup().addTo(myMap);
   
   // URL for the earthquake data in GeoJSON format
-  var url = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_month.geojson";
+  var earthquakeURL = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_month.geojson";
+  var tectonicPlatesURL = "/Users/nels.jacobson2/Desktop/Analytics_Class_Folder/06062023_Challenge/leaflet-challenge/static/tectonicplates.json";
   
   // Fetch the earthquake data using D3
-  d3.json(url).then(function (data) {
+  d3.json(earthquakeURL).then(function (earthquakeData) {
     // Loop through the earthquake data
-    data.features.forEach(function (earthquake) {
+    earthquakeData.features.forEach(function (earthquake) {
       // Extract the necessary properties from the data
       var magnitude = earthquake.properties.mag;
       var depth = earthquake.geometry.coordinates[2];
@@ -49,6 +51,16 @@ var myMap = L.map("map", {
     });
   });
   
+  // Fetch the tectonic plates data using D3
+  d3.json(tectonicPlatesURL).then(function (plateData) {
+    L.geoJSON(plateData, {
+      style: {
+        color: "orange",
+        weight: 2,
+      },
+    }).addTo(tectonicPlates);
+  });
+  
   // Create a legend control
   var legend = L.control({ position: "bottomright" });
   
@@ -61,7 +73,7 @@ var myMap = L.map("map", {
     for (var i = 0; i < depths.length; i++) {
       div.innerHTML +=
         '<i style="background:' + getColor(depths[i] + 1) + '"></i> ' +
-        depths[i] + (depths[i + 1] ? '&ndash;' + depths[i + 1] + ' km<br>' : '+ km');
+        depths[i] + (depths[i + 1] ? "&ndash;" + depths[i + 1] + " km<br>" : "+ km");
     }
   
     return div;
@@ -79,6 +91,7 @@ var myMap = L.map("map", {
   // Define overlay map layers
   var overlayMaps = {
     "Earthquakes": earthquakes,
+    "Tectonic Plates": tectonicPlates,
   };
   
   // Add layer controls to the map
